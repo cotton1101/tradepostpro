@@ -1,0 +1,169 @@
+version: '3.8'
+
+services:
+  # ============================================================
+  # FastAPI バックエンドAPI
+  # ============================================================
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: tradepost-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mysql+pymysql://${DB_USER:-tradepost}:${DB_PASSWORD:-password}@db:3306/${DB_NAME:-tradepost}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./output:/app/output
+      - ./logs/backend:/app/logs
+      - ./assets:/app/assets
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tradepost-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ============================================================
+  # スケジューラー（投稿ジョブ処理）
+  # ============================================================
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: tradepost-scheduler
+    restart: unless-stopped
+    command: ["python3", "-m", "backend.services.scheduler_service"]
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=mysql+pymysql://${DB_USER:-tradepost}:${DB_PASSWORD:-password}@db:3306/${DB_NAME:-tradepost}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./output:/app/output
+      - ./logs/scheduler:/app/logs
+      - ./assets:/app/assets
+    depends_on:
+      - backend
+      - db
+      - redis
+    networks:
+      - tradepost-network
+
+  # ============================================================
+  # Laravel ダッシュボード
+  # ============================================================
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: tradepost-dashboard
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_NAME:-tradepost}
+      - DB_USERNAME=${DB_USER:-tradepost}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - API_BASE_URL=http://backend:8000
+    volumes:
+      - ./logs/dashboard:/var/www/html/storage/logs
+    depends_on:
+      - backend
+      - db
+    networks:
+      - tradepost-network
+
+  # ============================================================
+  # MySQL データベース
+  # ============================================================
+  db:
+    image: mysql:8.0
+    container_name: tradepost-db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-tradepost}
+      MYSQL_USER: ${DB_USER:-tradepost}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/config/mysql.cnf:/etc/mysql/conf.d/custom.cnf
+    networks:
+      - tradepost-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ============================================================
+  # Redis（キャッシュ・キュー）
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: tradepost-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - tradepost-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # Nginx リバースプロキシ（本番用）
+  # ============================================================
+  nginx:
+    image: nginx:alpine
+    container_name: tradepost-nginx
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - ./docker/config/nginx-proxy.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/ssl:/etc/nginx/ssl
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - backend
+      - dashboard
+    networks:
+      - tradepost-network
+    profiles:
+      - production
+
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  tradepost-network:
+    driver: bridge

@@ -1,0 +1,142 @@
+name: CI - テスト & リント
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # ============================================================
+  # Python リント
+  # ============================================================
+  lint:
+    name: リント
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: リントツールインストール
+        run: pip install flake8 black isort
+
+      - name: flake8
+        run: flake8 modules/ backend/ --max-line-length=120 --ignore=E501,W503,E402
+
+      - name: black (チェックのみ)
+        run: black --check --line-length=120 modules/ backend/ || true
+
+      - name: isort (チェックのみ)
+        run: isort --check-only --profile black modules/ backend/ || true
+
+  # ============================================================
+  # ユニットテスト
+  # ============================================================
+  test:
+    name: テスト
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 依存パッケージキャッシュ
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: 依存パッケージインストール
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: フォントダウンロード
+        run: |
+          mkdir -p assets/fonts
+          cd assets/fonts
+          curl -L -o NotoSansJP-Bold.otf "https://github.com/google/fonts/raw/main/ofl/notosansjp/NotoSansJP-Bold.ttf" || true
+          curl -L -o NotoSansJP-Regular.otf "https://github.com/google/fonts/raw/main/ofl/notosansjp/NotoSansJP-Regular.ttf" || true
+
+      - name: テスト実行
+        run: |
+          python -m pytest tests/ -v --tb=short --cov=modules --cov=backend --cov-report=xml
+
+      - name: カバレッジレポート
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  # ============================================================
+  # 画像生成テスト
+  # ============================================================
+  image-test:
+    name: 画像生成テスト
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 依存パッケージインストール
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: フォントダウンロード
+        run: |
+          mkdir -p assets/fonts
+          cd assets/fonts
+          curl -L -o NotoSansJP-Bold.otf "https://github.com/google/fonts/raw/main/ofl/notosansjp/NotoSansJP-Bold.ttf" || true
+          curl -L -o NotoSansJP-Regular.otf "https://github.com/google/fonts/raw/main/ofl/notosansjp/NotoSansJP-Regular.ttf" || true
+
+      - name: サンプル画像生成
+        run: python main.py --sample --dry-run
+
+      - name: 生成画像をアーティファクトに保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-images
+          path: output/*.jpg
+
+  # ============================================================
+  # Docker ビルドテスト
+  # ============================================================
+  docker-build:
+    name: Docker ビルド
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker Buildx セットアップ
+        uses: docker/setup-buildx-action@v3
+
+      - name: バックエンドイメージビルド
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.backend
+          push: false
+          tags: tradepost-backend:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

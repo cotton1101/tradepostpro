@@ -1,0 +1,43 @@
+# TradePost Pro - FastAPI Backend
+FROM python:3.11-slim
+
+# システム依存パッケージ
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    fonts-noto-cjk \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 作業ディレクトリ
+WORKDIR /app
+
+# 依存パッケージインストール
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir gunicorn uvicorn[standard]
+
+# アプリケーションコード
+COPY . .
+
+# フォントディレクトリ
+RUN mkdir -p /app/assets/fonts /app/output /app/logs
+
+# 非rootユーザー
+RUN groupadd -r tradepost && useradd -r -g tradepost tradepost \
+    && chown -R tradepost:tradepost /app
+USER tradepost
+
+# ヘルスチェック
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# ポート
+EXPOSE 8000
+
+# 起動コマンド
+CMD ["gunicorn", "backend.app:app", \
+     "-w", "4", \
+     "-k", "uvicorn.workers.UvicornWorker", \
+     "-b", "0.0.0.0:8000", \
+     "--access-logfile", "/app/logs/access.log", \
+     "--error-logfile", "/app/logs/error.log"]

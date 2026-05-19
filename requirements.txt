@@ -1,0 +1,61 @@
+# ============================================================
+# TradePost Pro (XM Affiliate SNS Auto Poster) - 依存パッケージ
+# Phase 1-9 全依存関係
+# ============================================================
+
+# === コア ===
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# === 画像・動画生成 ===
+Pillow>=10.0.0
+moviepy>=2.0.0
+
+# === SNS連携 ===
+tweepy>=4.14.0
+line-bot-sdk>=3.5.0
+
+# === スケジューラ ===
+schedule>=1.2.0
+
+# === Webフレームワーク (Phase 2+) ===
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+gunicorn>=21.2.0
+
+# === データベース (Phase 2+) ===
+sqlalchemy>=2.0.0
+PyMySQL>=1.1.0       # MySQL使用時（Pure Python） - docker-compose.yml が mysql+pymysql:// を使用
+
+# === 認証・セキュリティ (Phase 3+) ===
+PyJWT>=2.8.0
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+pyotp>=2.9.0
+qrcode>=7.4.0
+
+# === 決済 (Phase 4+) ===
+stripe>=7.0.0
+
+# === PDF生成 (Phase 9) ===
+fpdf2>=2.7.0
+
+# === GraphQL (Phase 9) ===
+strawberry-graphql[fastapi]>=0.219.0
+
+# === キャッシュ (Phase 9) ===
+# redis>=5.0.0  # Redis使用時
+
+# === エラートラッキング (Phase 9) ===
+# sentry-sdk[fastapi]>=1.40.0  # Sentry使用時
+
+# === メール送信 (Phase 9) ===
+# sendgrid>=6.11.0  # SendGrid使用時
+
+# === MT5 API（Windows VPS上でのみ） ===
+# MetaTrader5>=5.0.45
+
+# === 開発・テスト ===
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+httpx>=0.25.0

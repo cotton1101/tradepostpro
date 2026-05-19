@@ -1,0 +1,113 @@
+# robots.txt - TradePost Pro
+# https://sns-tool.online/tradepostpro/
+
+# ================================================================
+# Major Search Engines - Allow all
+# ================================================================
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Yahoo
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# ================================================================
+# AI Assistants - Allow (for discovery via ChatGPT, Claude, etc.)
+# ================================================================
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# ================================================================
+# Block aggressive SEO scrapers
+# ================================================================
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+# ================================================================
+# Default rules for all other crawlers
+# ================================================================
+User-agent: *
+Allow: /
+Allow: /og-image.jpg
+Allow: /logo.png
+Disallow: /api/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /template-editor
+Disallow: /*?*
+Disallow: /*.json$
+
+# ================================================================
+# Sitemap
+# ================================================================
+Sitemap: https://sns-tool.online/tradepostpro/sitemap.xml

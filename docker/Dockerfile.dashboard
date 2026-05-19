@@ -1,0 +1,48 @@
+# TradePost Pro - Laravel Dashboard
+FROM php:8.2-fpm
+
+# システム依存パッケージ
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    zip \
+    unzip \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    nginx \
+    supervisor \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 作業ディレクトリ
+WORKDIR /var/www/html
+
+# Composerファイルを先にコピー（キャッシュ最適化）
+COPY dashboard/composer.json dashboard/composer.lock* ./
+RUN composer install --no-dev --no-scripts --no-autoloader 2>/dev/null || true
+
+# アプリケーションコード
+COPY dashboard/ .
+RUN composer dump-autoload --optimize 2>/dev/null || true
+
+# パーミッション
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage 2>/dev/null || true \
+    && chmod -R 755 /var/www/html/bootstrap/cache 2>/dev/null || true
+
+# Nginx設定
+COPY docker/config/nginx-dashboard.conf /etc/nginx/sites-available/default
+
+# Supervisor設定
+COPY docker/config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# ポート
+EXPOSE 80
+
+# 起動
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

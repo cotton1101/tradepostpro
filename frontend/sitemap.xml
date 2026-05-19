@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Home / Landing Page -->
+  <url>
+    <loc>https://sns-tool.online/tradepostpro/</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://sns-tool.online/tradepostpro/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://sns-tool.online/tradepostpro/"/>
+    <image:image>
+      <image:loc>https://sns-tool.online/tradepostpro/og-image.jpg</image:loc>
+      <image:title>TradePost Pro - FXトレード結果を5つのSNSに毎日自動投稿</image:title>
+      <image:caption>MT4/MT5対応のFX SNS自動投稿SaaS</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Features -->
+  <url>
+    <loc>https://sns-tool.online/tradepostpro/#features</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- How it works -->
+  <url>
+    <loc>https://sns-tool.online/tradepostpro/#how-it-works</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Templates -->
+  <url>
+    <loc>https://sns-tool.online/tradepostpro/#templates</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Pricing -->
+  <url>
+    <loc>https://sns-tool.online/tradepostpro/#pricing</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- Guide -->
+  <url>
+    <loc>https://sns-tool.online/tradepostpro/?page=guide</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Contact -->
+  <url>
+    <loc>https://sns-tool.online/tradepostpro/?page=contact</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Register -->
+  <url>
+    <loc>https://sns-tool.online/tradepostpro/?page=register</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Login -->
+  <url>
+    <loc>https://sns-tool.online/tradepostpro/?page=login</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+</urlset>
