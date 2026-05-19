@@ -98,3 +98,6 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# CI/CD workflows (internal use only, not for public repo)
+.github/workflows/
